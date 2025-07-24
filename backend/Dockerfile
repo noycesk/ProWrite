@@ -1,21 +1,21 @@
 # Use official JDK 21 image
 FROM eclipse-temurin:21-jdk-alpine
 
-# setting working dir inside container so that it can be mangaed
+# Install Maven
+RUN apk add --no-cache maven
+
+# Set working directory
 WORKDIR /app
 
-# copy maven wrapper files
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw #adding permissions
-RUN ./mvnw dependency:go-offline
+# Copy only the pom to cache dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# copy source code
+# Copy source code
 COPY src ./src
 
-# building proj without test
-RUN ./mvnw clean package -DskipTests
+# Build the project without tests
+RUN mvn clean package -DskipTests
 
-#running the jar file
+# Run the jar
 CMD ["java", "-jar", "target/prowrite.jar"]
-
